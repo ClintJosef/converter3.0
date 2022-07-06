@@ -2,10 +2,10 @@ import PySimpleGUI as sg
 
 
 def calculator_window(theme: str = None):
-    if theme is not None:
+    if isinstance(theme, str):
         sg.theme(theme)
     sg.set_options(font='ComicSansMS 14', button_element_size=(2, 2))
-    menu = ['menu', ['Purple', 'Tan', 'HotDogStand', 'GrayGrayGray', 'Dark', 'LightBlue1', 'DarkTeal2', 'random']]
+    menu = ['themes', ['Purple', 'Tan', 'HotDogStand', 'GrayGrayGray', 'Dark', 'LightBlue1', 'DarkTeal2', 'random']]
     layout = [
         [sg.Text(
             'output',
@@ -23,60 +23,93 @@ def calculator_window(theme: str = None):
         'Calculator',
         layout,
         element_justification='right',
-        return_keyboard_events=True
-    )
+        return_keyboard_events=True)
 
 
 def calculator():
-    nums = []
-    display_num = ''
-    operations = []
-
     window = calculator_window()
 
-    print("App started")
+    def not_entered():
+        window['-NUM-'].update('At least enter something')
+
+    nums = []
+    operations = []
+    result = ''
+    display_num = ''
+
+    print('App started')
     while True:
-        event, values = window.read()
-        if event == sg.WIN_CLOSED: break
+        event, values = window()
 
-        if event in ['Purple', 'Tan', 'HotDogStand', 'GrayGrayGray', 'Dark', 'LightBlue1', 'DarkTeal2', 'random']:
-            window.close()
-            window = calculator_window(event)
+        match event:
+            case sg.WIN_CLOSED:
+                break
 
-        if event in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.']:
-            nums.append(event)
-            display_num = ''.join(nums)
-            window['-NUM-'].update(display_num)
+            case event if event in ['Purple', 'Tan', 'HotDogStand', 'GrayGrayGray', 'Dark', 'LightBlue1', 'DarkTeal2', 'random']:
+                window.close()
+                window = calculator_window(event)
 
-        if event in ['*', '/', '-', '+']:
-            operations.append(display_num)
-            nums = []
-            operations.append(event)
-            window['-NUM-'].update('')
-
-        if event == 'Enter':
-            if operations:
-                try:
-                    operations.append(display_num)
-                    result = eval(''.join(operations))
-                    window['-NUM-'].update(result)
-                except ZeroDivisionError:  # Did not know this error existed
-                    operations = []
-                    nums = []
-                    window['-NUM-'].update("Can't divide by zero")  # But I can see why it does
-            else: window['-NUM-'].update('At least enter something')
-
-        if event == 'Clear':
-            operations = []
-            nums = []
-            window['-NUM-'].update('output')
-
-        if event == 'Delete':
-            if display_num and nums:
-                display_num = display_num[:-1]
-                nums = nums[:-1]
+            case event if event in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.']:
+                nums.append(event)
+                display_num = ''.join(nums)
                 window['-NUM-'].update(display_num)
-            else: window['-NUM-'].update('At least enter something')
+
+            case event if event in ['*', '/', '-', '+']:
+                if display_num or result:
+                    if result:
+                        operations = [result]
+                        result = ''
+                    else:
+                        operations.append(display_num)
+                    display_num = None
+                    nums = []
+                    operations.append(event)
+                    window['-NUM-'].update('')
+                else:
+                    not_entered()
+
+            case 'Enter':
+                if operations and display_num is not None:
+                    try:
+                        operations.append(display_num)
+                        if len(operations) > 2:
+                            result = str(eval(''.join(operations)))
+                            window['-NUM-'].update(result)
+                            nums = []
+                            display_num = ''
+                            print(result)
+                        else:
+                            not_entered()
+                    except ZeroDivisionError:  # Did not know this error existed
+                        operations = []
+                        nums = []
+                        window['-NUM-'].update("Can't divide by zero")  # But I can see why it does
+                else:
+                    not_entered()
+
+            case 'Clear':
+                nums = []
+                operations = []
+                display_num = ''
+                result = ''
+                window['-NUM-'].update('output')
+
+            case 'Delete':
+                if display_num and nums:
+                    display_num = display_num[:-1]
+                    nums = nums[:-1]
+                    window['-NUM-'].update(display_num)
+                elif result:
+                    try:
+                        result = result[:-1]
+                        if result[-1] == '.':
+                            result = result[:-1]
+                        window['-NUM-'].update(result)
+                    except IndexError:
+                        window['-NUM-'].update(result)
+                else:
+                    window['-NUM-'].update('At least enter something')
+
     window.close()
 
 
