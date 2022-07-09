@@ -1,2 +1,2 @@
 # converter3.0
-pysimplegui
+pip install PySimpleGUI
