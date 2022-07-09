@@ -61,7 +61,7 @@ def calculator():
                         result = ''
                     else:
                         operations.append(display_num)
-                    display_num = None
+                    display_num = ''
                     nums = []
                     operations.append(event)
                     window['-NUM-'].update('')
@@ -69,7 +69,7 @@ def calculator():
                     not_entered()
 
             case 'Enter':
-                if operations and display_num is not None:
+                if operations and display_num:
                     try:
                         operations.append(display_num)
                         if len(operations) > 2:
@@ -77,7 +77,6 @@ def calculator():
                             window['-NUM-'].update(result)
                             nums = []
                             display_num = ''
-                            print(result)
                         else:
                             not_entered()
                     except ZeroDivisionError:  # Did not know this error existed
@@ -104,9 +103,10 @@ def calculator():
                         result = result[:-1]
                         if result[-1] == '.':
                             result = result[:-1]
-                        window['-NUM-'].update(result)
+                        display_num = result
+                        window['-NUM-'].update(display_num)
                     except IndexError:
-                        window['-NUM-'].update(result)
+                        window['-NUM-'].update(display_num)
                 else:
                     window['-NUM-'].update('At least enter something')
 
