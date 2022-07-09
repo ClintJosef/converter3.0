@@ -108,7 +108,7 @@ def calculator():
                     except IndexError:
                         window['-NUM-'].update(display_num)
                 else:
-                    window['-NUM-'].update('At least enter something')
+                    not_entered()
 
     window.close()
 
