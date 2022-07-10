@@ -1,8 +1,8 @@
 import PySimpleGUI as sg
 
 
-def calculator_window(theme: str = None):
-    if isinstance(theme, str):
+def calculator_window(theme=''):
+    if theme:
         sg.theme(theme)
     sg.set_options(font='ComicSansMS 14', button_element_size=(2, 2))
     menu = ['themes', ['Purple', 'Tan', 'HotDogStand', 'GrayGrayGray', 'Dark', 'LightBlue1', 'DarkTeal2', 'random']]
